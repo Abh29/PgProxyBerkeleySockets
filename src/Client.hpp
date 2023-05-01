@@ -8,7 +8,7 @@
 class Connection;
 
 #define RR_MODE	0	// read request from the client
-#define WR_MODE 1   // send response to client
+#define WR_MODE 1	// send response to client
 #define RQ_MODE	2	// receive query response from the remote server
 #define WQ_MODE	3	// send query to the remote server
 
