@@ -45,11 +45,54 @@ private:
 
 
 public:
+
+	/*
+	 * @param localIP : the ip (ipv4) address of the client
+	 * @param localPort : the port of the local (proxy) server
+	 * @param remoteIP : the ip (ipv4) address of the remote server
+	 * @param remotePort : the port of the remote server
+	 * @param logPath : the path to the logging file
+	 *
+	 * initializes looping to true and logFile to null
+	 */
 	ServerEpoll(std::string& localIp, int localPort, std::string& remoteIp, int remotePort, std::string& logPath);
+
+
+	/*
+	 * closes the logFile, close the server socket then it
+	 * disconnects and removes the clients
+	 */
 	~ServerEpoll();
 
+
+	/*
+	 * opens the logging file with fopen, then open a listening socket (socket/bind/listen) and
+	 * sets it to NONBLOCK.
+	 * then it creates an epoll instance with epoll_create1 and adds the server socket to the
+	 * epoll set of fds to be monitored
+	 *
+	 * throws InitException on error
+	 */
 	void init() override;
+
+
+	/*
+	 * works while looping == true
+	 * uses epoll_wait with infinite time to wait for io event to occur on one of
+	 * the fds monitored by epoll
+	 * if servSock is ready for reading it accepts a new client
+	 * then loops for each file descriptor in the ep_events and checks if it is a client or connection
+	 * socket and accordingly to the client mode it performs a read/write to the client/remoteServer
+	 * finally it deletes the disconnected clients
+	 *
+	 * throws ProcessingException on error.
+	 */
 	void loop() override;
+
+
+	/*
+	 * sets looping parameter to false
+	 */
 	void stop() override;
 
 
@@ -77,9 +120,42 @@ public:
 
 
 private:
+
+	/*
+	 *	accepts a new connection to the server socket then creates a new client object
+	 *	and adds it to the fdClientMap and connClientMap,
+	 *	then it adds the client socket and the connection socket to the epoll set to be
+	 *	monitored by epoll using epoll_ctl function, it monitors them for read and write
+	 *	by setting the events mask to EPOLLIN | EPOLLOUT
+	 *
+	 *	throws ProcessingException or InitException on error.
+	 */
 	void 	acceptNewClient();
+
+	/*
+	 * loops through the clients list and deletes the disconnected client
+	 * and removes them from the epoll set
+	 */
 	void 	clearDisconnected();
+
+
+	/*
+	 * @param format : the required format of the date-time to be passed to the strftime fuction
+	 * @param buff : the buffer where the result will be saved
+	 * @param len :  the size of the buffer
+	 *
+	 * creates a localtime instance then writes the date and time to the buffer using strftime
+	 */
 	size_t 	getCurrentTime(const char *format, char *buff, size_t len);
+
+
+	/*
+	 * @param c : a pointer to a client
+	 *
+	 * checks the first byte of the client buffer, if it equals 'Q' it saves the time
+	 * and some basic information about the client to the log file using the fwrite function
+	 * if it can not write to the file it outputs the logs to stdout
+	 */
 	void 	logRequest(Client *c);
 
 };

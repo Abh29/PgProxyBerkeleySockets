@@ -14,6 +14,14 @@ protected:
 	std::string logPath;
 
 public:
+
+	/*
+	 * @param localIP : the ip (ipv4) address of the client
+	 * @param localPort : the port of the local (proxy) server
+	 * @param remoteIP : the ip (ipv4) address of the remote server
+	 * @param remotePort : the port of the remote server
+	 * @param logPath : the path to the logging file
+	 */
 	IServer(std::string& localIP, int localPort, std::string& remoteIP, int remotePort, std::string& logPath) :
 	localIP(localIP),
 	remoteIP(remoteIP),
@@ -22,9 +30,25 @@ public:
 	logPath(logPath)
 	{};
 
+	/*
+	 * destructor for the server
+	 */
 	virtual ~IServer() = default;
+
+
+	/*
+	 * initializes the server
+	 */
 	virtual void init() = 0;
+
+	/*
+	 * the main loop of the server
+	 */
 	virtual void loop() = 0;
+
+	/*
+	 * stops the server's loop
+	 */
 	virtual void stop() = 0;
 
 };

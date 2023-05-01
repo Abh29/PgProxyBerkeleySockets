@@ -12,6 +12,12 @@ ServerEpoll::ServerEpoll(std::string &localIp, int localPort, std::string &remot
 
 ServerEpoll::~ServerEpoll() {
 	fclose(logFile);
+	close(epfd);
+
+	for (auto it = fdClientMap.begin(); it != fdClientMap.end(); ++it)
+		delete it->second;
+	fdClientMap.clear();
+	connClientMap.clear();
 }
 
 

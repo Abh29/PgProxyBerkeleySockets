@@ -41,6 +41,7 @@
     - For now the proxy server processes only one request at a time, which is not efficient at all !
         to solve this we could process each request in a separate thread (thread pool)
     - Implement a better solution for logging
+    - Do buffering of the request/response in a separated class
     - Add more other request types to the logging (not only the SQL-querries)
     - ps: as this was a specific response to a task, it was explecitely said what could be used, this is 
         why i didn't implement the obove points.
