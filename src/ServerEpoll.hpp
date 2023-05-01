@@ -1,49 +1,57 @@
-#ifndef __SERVER_HPP_
-#define __SERVER_HPP_
+#ifndef __SERVER_EPOLL_HPP_
+#define __SERVER_EPOLL_HPP_
+
+/*
+ * using epoll for Linux as it tends to be faster than select.
+ */
 
 #include <unistd.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <sys/epoll.h>
 #include <fcntl.h>
 #include <iostream>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <list>
 #include <cstring>
 #include <cstdio>
 #include <iomanip>
 #include <ctime>
 
-
 #include "Client.hpp"
 #include "IServer.hpp"
 
-#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define MAX_EVENTS 64
+
 
 class Client;
 
-class ServerSelect : public IServer {
+class ServerEpoll : public IServer {
 
 private:
-	int 				servSock;
-	int 				last_id;
-	int 				max_fds;
-	fd_set				rSet, wSet;
-	std::list<Client *> clients;
-	sockaddr_in 		servAddr;
-	volatile bool 		looping;
-	std::FILE			*logFile;
+
+	int 								servSock;
+	int 								last_id;
+	std::unordered_map<int, Client *> 	fdClientMap;
+	std::unordered_map<int, Client *> 	connClientMap;
+	sockaddr_in 						servAddr;
+	volatile bool 						looping;
+	std::FILE							*logFile;
+	int									epfd; // epoll instance fd
+	epoll_event 						ev, ep_events[MAX_EVENTS]; // epoll events
+
 
 public:
-
-	ServerSelect(std::string &localIp, int localPort, std::string &remoteIp, int remotePort, std::string &logPath);
-	~ServerSelect() override;
+	ServerEpoll(std::string& localIp, int localPort, std::string& remoteIp, int remotePort, std::string& logPath);
+	~ServerEpoll();
 
 	void init() override;
 	void loop() override;
 	void stop() override;
+
 
 	class InitException: public std::exception {
 	private:
@@ -67,18 +75,17 @@ public:
 	};
 
 
+
 private:
 	void 	acceptNewClient();
-	void 	resetSets();
 	void 	clearDisconnected();
 	size_t 	getCurrentTime(const char *format, char *buff, size_t len);
 	void 	logRequest(Client *c);
+
 };
 
 
 
 
 
-
-
-#endif //__SERVER_HPP_
+#endif

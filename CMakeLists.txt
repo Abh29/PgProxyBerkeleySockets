@@ -12,4 +12,4 @@ add_executable(pgProxySockets
         src/Connection.cpp
         src/Connection.hpp
         src/ServerSelect.hpp
-        src/IServer.hpp)
+        src/IServer.hpp src/ServerEpoll.cpp src/ServerEpoll.hpp)

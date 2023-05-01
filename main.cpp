@@ -1,7 +1,13 @@
 #include <iostream>
 #include <csignal>
-#include "src/ServerSelect.hpp"
 
+#if 1
+#include "src/ServerSelect.hpp"
+typedef ServerSelect ServerImp;
+#else
+#include "src/ServerEpoll.hpp"
+typedef ServerEpoll ServerImp;
+#endif
 
 IServer *g_server;
 
@@ -17,9 +23,11 @@ int main(int argc, char** argv) {
 		std::cout << "./server localIP localPort remoteIP remotePort logPath" << std::endl;
 		return 1;
 	}
-
+	signal(SIGPIPE, SIG_IGN);
 	signal(SIGTERM, sigHandler);
 	signal(SIGINT, sigHandler);
+	signal(SIGQUIT, sigHandler);
+
 
 	std::string localIP(argv[1]);
 	std::string remoteIP(argv[3]);
@@ -27,7 +35,7 @@ int main(int argc, char** argv) {
 	int localPort = atoi(argv[2]);
 	int remotePort = atoi(argv[4]);
 
-	IServer *s = new ServerSelect(localIP, localPort, remoteIP, remotePort, logPath);
+	IServer *s = new ServerImp(localIP, localPort, remoteIP, remotePort, logPath);
 	g_server = s;
 	try {
 		std::cout << "init ..." << std::endl;

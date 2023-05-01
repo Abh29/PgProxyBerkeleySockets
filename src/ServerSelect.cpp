@@ -6,6 +6,7 @@ ServerSelect::ServerSelect(std::string &localIp, int localPort, std::string &rem
 		last_id(),
 		max_fds()
 		{
+			std::cout << "Select server !" << std::endl;
 			FD_ZERO(&rSet);
 			FD_ZERO(&wSet);
 			memset(&servAddr, 0, sizeof(servAddr));
@@ -43,7 +44,6 @@ void ServerSelect::init() {
 		throw InitException(strerror(errno));
 }
 
-
 void ServerSelect::loop() {
 	int selected = 0;
 	while (looping) {
@@ -62,8 +62,7 @@ void ServerSelect::loop() {
 				} else if (c->readyToQueryServer() && FD_ISSET(c->getRemoteSocket(), &wSet)) {
 					c->sendRequest();
 				}
-				if (false && c->readyToReadServerResp() && FD_ISSET(c->getRemoteSocket(), &rSet) && FD_ISSET(c->getClientSocket(), &wSet)) {
-					std::cout << "relaying response to client!" << std::endl;
+				if (c->readyToReadServerResp() && FD_ISSET(c->getRemoteSocket(), &rSet) && FD_ISSET(c->getClientSocket(), &wSet)) {
 					c->relay();
 				} else if (c->readyToReadServerResp() && FD_ISSET(c->getRemoteSocket(), &rSet)) {
 					c->receiveResponse();
@@ -76,7 +75,6 @@ void ServerSelect::loop() {
 	}
 }
 
-
 void ServerSelect::acceptNewClient() {
 	sockaddr_in clt;
 	unsigned int len = sizeof(clt);
@@ -88,9 +86,10 @@ void ServerSelect::acceptNewClient() {
 	inet_ntop(AF_INET, &(clt.sin_addr), c_ip, 255);
 	try {
 		std::string ip(c_ip);
-		clients.push_back(new Client(fd, ip, remoteIP, remotePort));
-		clients.back()->setID(++last_id);
-		std::cout << "client from address " << ip << ": is added !" << std::endl;
+		Client *c = new Client(fd, ip, remoteIP, remotePort);
+		clients.push_back(c);
+		c->setID(++last_id);
+		std::cout << "client from address " << ip << " with id = " << c->getID() << " : is added" << std::endl;
 	} catch (const Connection::ConnectionException& e) {
 		std::cerr << "Could not opent a connection with the remote server!" << std::endl;
 		throw ServerSelect::ProcessingException(e.what());
@@ -131,7 +130,8 @@ void ServerSelect::clearDisconnected() {
 	while (it != clients.end()) {
 		Client *c = *it;
 		if (!c->isConnected()) {
-			std::cout << "client from address " << c->getIP() << " : is disconnected !" << std::endl;
+			std::cout << "client from address " << c->getIP() << " with id = " <<
+					  c->getID() << " : is disconnected !" << std::endl;
 			delete *it;
 			auto p = it;
 			++it;
@@ -145,7 +145,7 @@ void ServerSelect::stop() {
 	looping = false;
 }
 
-size_t getCurrentTime(const char *format, char *buff, size_t len) {
+size_t ServerSelect::getCurrentTime(const char *format, char *buff, size_t len) {
 	time_t _t;
 	time(&_t);
 	tm *_tm = localtime(&_t);
