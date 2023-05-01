@@ -5,7 +5,7 @@
     - the code is devided as follows:
 ### Server:
     - Iserver.hpp is an interface defining the global shape of the server class:
-        - a constructor that takes the local ip of the server and the DBserver and their 
+        - a constructor that takes the ip (Ipv4 only) of the server and the DBserver and their 
             respective ports as well as the logging file's path
         - void init(); initialize the server (open socket, open log file ...)
         - void loop(); the server start listening to incomming trafic and delling with it
@@ -37,6 +37,7 @@
         if it equals 'Q' then the request is logged.
 
 ## Further Improvements:
+    - add Ipv6 support and ssl
     - For now the proxy server processes only one request at a time, which is not efficient at all !
         to solve this we could process each request in a separate thread (thread pool)
     - Implement a better solution for logging
