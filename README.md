@@ -1,5 +1,5 @@
 # PgProxyBerkleySockets
-    - create a simple proxy server for postgresql database, the server logs the querries made to the database.
+    - create a simple proxy server for postgresql database, the server logs the queries made to the database.
 
 ## implementation:
     - the code is devided as follows:
