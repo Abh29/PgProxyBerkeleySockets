@@ -44,3 +44,6 @@
     - Add more other request types to the logging (not only the SQL-querries)
     - ps: as this was a specific response to a task, it was explecitely said what could be used, this is 
         why i didn't implement the obove points.
+
+## Note:
+    - to use the epoll implementation change line:4 in the main.cpp to '#if 0'
