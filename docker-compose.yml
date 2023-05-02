@@ -1,0 +1,21 @@
+version: '3'
+services:
+    pgsql:
+        image: 'postgres:15'
+        ports:
+            - '${FORWARD_DB_PORT:-5432}:5432'
+        environment:
+            PGPASSWORD: 'secret'
+            POSTGRES_DB: 'app'
+            POSTGRES_USER: 'app'
+            POSTGRES_PASSWORD: 'secret'
+        volumes:
+            - 'db-volume:/var/lib/postgresql/data'
+        networks:
+            - db-network
+networks:
+    db-network:
+        driver: bridge
+volumes:
+    db-volume:
+        driver: local
