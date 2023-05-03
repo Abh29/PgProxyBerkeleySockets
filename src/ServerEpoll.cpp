@@ -50,6 +50,8 @@ void ServerEpoll::init() {
 	ev.data.fd = servSock;
 	if (epoll_ctl(epfd, EPOLL_CTL_ADD, servSock, &ev) < 0)
 		throw InitException(strerror(errno));
+
+	fillMessageTypes();
 }
 
 void ServerEpoll::stop() {looping = false;}
