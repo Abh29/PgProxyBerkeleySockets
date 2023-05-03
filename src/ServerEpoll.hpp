@@ -15,6 +15,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <list>
 #include <cstring>
 #include <cstdio>
@@ -42,6 +43,7 @@ private:
 	std::FILE							*logFile;
 	int									epfd; // epoll instance fd
 	epoll_event 						ev, ep_events[MAX_EVENTS]; // epoll events
+	std::map<char, std::string> 		messageTypes;
 
 
 public:
@@ -157,6 +159,15 @@ private:
 	 * if it can not write to the file it outputs the logs to stdout
 	 */
 	void 	logRequest(Client *c);
+
+	/*
+	 * messageTypes contains a char which is the first bite of a received request from the
+	 * client and maps it to a string used in logging
+	 * this function fills messageTypes map with predefined char values and their meaning
+	 * https://www.postgresql.org/docs/current/protocol-message-formats.html
+	 * we can add more entries to this function to log other messages (commands, copy ...)
+	 */
+	void	fillMessageTypes();
 
 };
 

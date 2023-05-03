@@ -163,13 +163,14 @@ size_t ServerEpoll::getCurrentTime(const char *format, char *buff, size_t len) {
 	return strlen(buff);
 }
 
+
 void ServerEpoll::logRequest(Client *c) {
 	char * tmp = c->getBuffer().front().second;
-	if (c->getBufferSize() == 0 || *tmp != 'Q') return;
+	if (c->getBufferSize() == 0 || messageTypes.find((char) *tmp) == messageTypes.end()) return;
 
 	char *logBuff = (char *)alloca(c->getBufferSize() + 1024);
 	size_t timeLen = getCurrentTime("%Y.%m.%d %H:%M:%S\t-\t", logBuff, 50);
-	size_t prefixLen = sprintf(logBuff + timeLen, "ip: %s\t-\tclient %d: ", c->getIP().c_str(), c->getID()) + timeLen;
+	size_t prefixLen = sprintf(logBuff + timeLen, "ip: %s\t-\tclient %d: (%s)\t", c->getIP().c_str(), c->getID(), messageTypes.find(*tmp)->second.c_str()) + timeLen;
 
 	auto it = c->getBuffer().begin();
 	memmove(logBuff + prefixLen, it->second + 5, it->first - 5);
@@ -179,7 +180,9 @@ void ServerEpoll::logRequest(Client *c) {
 		prefixLen += it->first;
 	}
 
-	logBuff[prefixLen - 1] = 10;
+	std::string seperator("\n*****************************\n\n");
+	memmove(logBuff + prefixLen, seperator.c_str(), seperator.length());
+	prefixLen += seperator.length();
 	logBuff[prefixLen] = 0;
 
 	if (fwrite(logBuff, sizeof(char), prefixLen, logFile) < prefixLen) {
@@ -188,6 +191,12 @@ void ServerEpoll::logRequest(Client *c) {
 	}
 }
 
+void ServerEpoll::fillMessageTypes() {
+	messageTypes.insert(std::make_pair<char, std::string>('Q', "simple query"));
+	messageTypes.insert(std::make_pair<char, std::string>('B', "extended query bind"));
+	messageTypes.insert(std::make_pair<char, std::string>('P', "extended query parse"));
+	messageTypes.insert(std::make_pair<char, std::string>('D', "extended query describe"));
+}
 
 
 ServerEpoll::InitException::InitException() {
