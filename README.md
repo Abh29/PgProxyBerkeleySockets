@@ -34,7 +34,10 @@
 ## Additionally:
     - The logging happens on the level of the server, since this is a response to a specific task where it is 
         required to log only the SQL-queries, for each incoming traffic from the client the first byte is checked
-        if it equals 'Q' then the request is logged.
+        if it equals 'Q' (simple query) or {'P', 'B', 'D'} (extended query) then the request is logged.
+    - This values are saved in a map that is filled in the init routine
+    - We can add other message types to the log (command, execute, error ....), we need to add the identifier (byte1)
+        to the messageTypes map. (see: https://www.postgresql.org/docs/current/protocol-message-formats.html)
 
 ## Further Improvements:
     - add Ipv6 support and ssl
